@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ca" style="font-size: 100%"><head><style type="text/css">.turbo-progress-bar {
+  position: fixed;
+  display: block;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: #0076ff;
+  z-index: 2147483647;
+  transition:
+    width 300ms ease-out,
+    opacity 150ms 150ms ease-in;
+  transform: translate3d(0, 0, 0);
+}
+</style>
+    <title>New Magazine</title>
+    <link rel = "icon" href="{% static '/ico/favicon.ico' %}" sizes="any">
+    <link rel="stylesheet" href="{% static '/css/824.b4cc3385.css' %}" data-turbo-track="reload">
+    <link rel="stylesheet" href="{% static '/css/app.910c0aab.css' %}" data-turbo-track="reload">
+</head>
+
+<body>
+  <header id="header" class="header">
+        <div class="kbin-container">
+            <nav class="head-nav">
+                <div class="brand">
+                    <a href="/"><img id="logo" src="{% static '/svg/kbin_logo.svg' %}" alt="Homepage" title="Homepage"></a>
+                </div>
+                <menu class="head-nav__menu">
+                    <li></li>
+                    <li><a href="/" class="active">Threads</a></li>
+                    <li><a href="/microblog" class="">Microblog</a></li>
+                    <li><a href="/*" class="">All Content</a></li>
+                    <li><a href="/people" class="">People</a></li>
+                    <li><a href="/magazines" class="">Magazines</a></li>
+                    <li><a href="/magazines/collections" class="">Collections</a></li>
+                </menu>
+            </nav>
+            <menu>
+                <li class="dropdown"><a href="/new" class="icon" aria-label="Add" title="Add"><i class="fa-solid fa-plus"></i> Add</a>
+                    <ul class="dropdown__menu">
+                        <li><a href="/new" class="">Add new link</a></li>
+                            <li><a href="/new/article" class="">Add new thread</a></li>
+                            <li><a href="/new/photo" class="">Add new photo</a></li>
+                            <li><a class="" href="/microblog">Add new post</a></li>
+                            <li><a class="" href="/newMagazine">Create new magazine</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown"><a class=" login" href="/u/usuari_predeterminat"><span class="user-name">usuari_predeterminat</span></a>
+                    <ul class="dropdown__menu">
+                        <li><a href="/u/usuari_predeterminat" class="">Profile</a></li>
+                        <li><a href="/settings/general" class="">Settings</a></li>
+                        <li><a href="/profile/messages" class="">Messages</a></li>
+                        <li><a href="/settings/notifications" class="">Notifications</a></li>
+                        <li><a href="/logout">Log out</a></li>
+                    </ul>
+                </li>
+            </menu>
+        </div>
+    </header>
+<div class="magazines table-responsive">
+    <table>
+        <thead>
+            <tr>
+                <th style="text-align: center">Nom</th>
+                <th style="text-align: center">Threads</th>
+                <th style="text-align: center">Comentaris</th>
+                <th style="text-align: center">Publicacions</th>
+                <th style="text-align: center"> Suscripcions</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Revista1</td>
+            <td>120</td>
+            <td>20000</td>
+            <td>1234</td>
+            <td><aside class="magazine__subscribe" data-controller="subs">
+    <div class="action">
+        <i class="fa-solid fa-users"></i><span>19205</span>
+    </div>
+    <form action="/m/RedditMigration/subscribe" name="magazine_subscribe" method="post">
+        <button type="submit" class="btn btn__secondary action" data-action="subs#send">
+                            <i class="fa-sharp fa-solid fa-folder-plus"></i><span>Suscribirse</span>
+                    </button>
+        <input type="hidden" name="token" value="7e2255921aec37a03e492c6169de6._FrD8uqSXHogJxR5m34ywkBdhH3OrphDNkijgvicNtM.pRKns5D4OE0XZVA_oip1kw86_Eym4t0yABjE-7z3R-a4EZaUgqoMEmxrdw">
+    </form>
+    <form action="/m/RedditMigration/block" name="magazine_block" method="post">
+        <button type="submit" class="btn btn__secondary action" data-action="subs#send">
+                            <i class="fa-solid fa-ban"></i><span>Bloquear</span>
+                    </button>
+        <input type="hidden" name="token" value="43085c6af452.q3wwGbxqvvyi5kZLGIfctRSuv4c_vlcVqSGiRc2rj7c.xVFYboQnj7rYqCUhduG29GH60t17zzBMm0PWcr705P2aNgYs3weGr5fRDw">
+    </form>
+</aside></td>
+        </tr>
+
+
+        <tr>
+            <td>Revista2</td>
+            <td>99</td>
+            <td>15654</td>
+            <td>989</td>
+            <td><aside class="magazine__subscribe" data-controller="subs">
+    <div class="action">
+        <i class="fa-solid fa-users"></i><span>12567</span>
+    </div>
+    <form action="/m/RedditMigration/subscribe" name="magazine_subscribe" method="post">
+        <button type="submit" class="btn btn__secondary action" data-action="subs#send">
+                            <i class="fa-sharp fa-solid fa-folder-plus"></i><span>Suscribirse</span>
+                    </button>
+        <input type="hidden" name="token" value="7e2255921aec37a03e492c6169de6._FrD8uqSXHogJxR5m34ywkBdhH3OrphDNkijgvicNtM.pRKns5D4OE0XZVA_oip1kw86_Eym4t0yABjE-7z3R-a4EZaUgqoMEmxrdw">
+    </form>
+    <form action="/m/RedditMigration/block" name="magazine_block" method="post">
+        <button type="submit" class="btn btn__secondary action" data-action="subs#send">
+                            <i class="fa-solid fa-ban"></i><span>Bloquear</span>
+                    </button>
+        <input type="hidden" name="token" value="43085c6af452.q3wwGbxqvvyi5kZLGIfctRSuv4c_vlcVqSGiRc2rj7c.xVFYboQnj7rYqCUhduG29GH60t17zzBMm0PWcr705P2aNgYs3weGr5fRDw">
+    </form>
+</aside></td>
+        </tr>
+
+
+        <tr>
+            <td>Revista3</td>
+            <td>52</td>
+            <td>9734</td>
+            <td>521</td>
+            <td><aside class="magazine__subscribe" data-controller="subs">
+    <div class="action">
+        <i class="fa-solid fa-users"></i><span>9782</span>
+    </div>
+    <form action="/m/RedditMigration/subscribe" name="magazine_subscribe" method="post">
+        <button type="submit" class="btn btn__secondary action" data-action="subs#send">
+                            <i class="fa-sharp fa-solid fa-folder-plus"></i><span>Suscribirse</span>
+                    </button>
+        <input type="hidden" name="token" value="7e2255921aec37a03e492c6169de6._FrD8uqSXHogJxR5m34ywkBdhH3OrphDNkijgvicNtM.pRKns5D4OE0XZVA_oip1kw86_Eym4t0yABjE-7z3R-a4EZaUgqoMEmxrdw">
+    </form>
+    <form action="/m/RedditMigration/block" name="magazine_block" method="post">
+        <button type="submit" class="btn btn__secondary action" data-action="subs#send">
+                            <i class="fa-solid fa-ban"></i><span>Bloquear</span>
+                    </button>
+        <input type="hidden" name="token" value="43085c6af452.q3wwGbxqvvyi5kZLGIfctRSuv4c_vlcVqSGiRc2rj7c.xVFYboQnj7rYqCUhduG29GH60t17zzBMm0PWcr705P2aNgYs3weGr5fRDw">
+    </form>
+</aside></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

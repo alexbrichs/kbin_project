@@ -1,0 +1,42 @@
+<!-- Options top -->
+<aside class="options" id="options">
+    <div></div>
+    <menu class="options__main" style="align-items: center; justify-content: center;">
+        <li><a href="/u/{{ user.username }}" class="">
+            <span style="vertical-align: inherit;">general view</span>
+        </a></li>
+        <li><a href="/u/{{ user.username }}/threads" class="{% if type == 'threads' %}active{% endif %}">
+            <span style="vertical-align: inherit;">threads ({{ user.total_threads }})</span>
+        </a></li>
+        <li><a href="/u/{{ user.username }}/comments" class="{% if type == 'comments' %}active{% endif %}">
+            <span style="vertical-align: inherit;">comments ({{ user.total_comments }})</span>
+        </a></li>
+        <li><a href="/u/{{ user.username }}/boosts" class="{% if type == 'boosts' %}active{% endif %}">
+            <span style="vertical-align: inherit;">boosts ({{ user.total_boosts }})</span>
+        </a></li>
+    </menu>
+</aside>
+<!-- Options -->
+<aside class="options options--top" id="options" style="align-items: center; justify-content: center;">
+    <div></div>
+    <menu class="options__main no-scroll">
+        <li><a href="/u/{{ user.username }}/{{ type }}/top"
+               class="{% if ordre == 'top' %}active{% endif %}">
+            <font style="vertical-align: inherit;"><font style="vertical-align: inherit;">
+                top
+            </font></font>
+        </a></li>
+        <li><a href="/u/{{ user.username }}/{{ type }}"
+                class="{% if ordre == 'newest' %}active{% endif %}">
+            <font style="vertical-align: inherit;"><font style="vertical-align: inherit;">
+                newest
+            </font></font>
+        </a></li>
+        <li><a href="/u/{{ user.username }}/{{ type }}/commented"
+               class="{% if ordre == 'commented' %}active{% endif %}">
+            <font style="vertical-align: inherit;"><font style="vertical-align: inherit;">
+                commented
+            </font></font>
+        </a></li>
+    </menu>
+</aside>

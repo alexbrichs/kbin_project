@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ca" style="font-size: 100%">
+<head>
+    <style type="text/css">.turbo-progress-bar {
+        position: fixed;
+        display: block;
+        top: 0;
+        left: 0;
+        height: 3px;
+        background: #0076ff;
+        z-index: 2147483647;
+        transition: width 300ms ease-out,
+        opacity 150ms 150ms ease-in;
+        transform: translate3d(0, 0, 0);
+    }
+    </style>
+    <title>kbin.social - Explore the Fediverse</title>
+    <link rel="icon" href="{% static '/ico/favicon.ico' %}" sizes="any">
+    <link rel="stylesheet" href="{% static '/css/824.b4cc3385.css' %}" data-turbo-track="reload">
+    <link rel="stylesheet" href="{% static '/css/app.910c0aab.css' %}" data-turbo-track="reload">
+</head>
+<body class="theme--light" data-controller="kbin notifications" data-turbo="false">
+{% include 'base.html' %}
+<div id="middle" class="page-entry-single">
+    <div class="kbin-container">
+        <main id="main" data-controller="lightbox timeago" class="">
+            <div id="content">
+                {% include 'show_threads.html' %}
+                {% if editat %}
+                    <div class="alert alert__success" role="alert">
+                        {% if thread.url == '' %}
+                            The thread has been successfully edited.
+                        {% else %}
+                            The link has been successfully edited.
+                        {% endif %}
+                    </div>
+                {% endif %}
+                <aside class="options" id="options">
+                    <div></div>
+                    <menu class="options__main">
+                        <li>
+                            <a href="{% url 'veure_thread' thread.id 'top' %}"
+                               class="{% if request.session.order == 'top' %}active{% endif %}">
+                                top
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'veure_thread' thread.id 'newest' %}"
+                               class="{% if request.session.order == 'newest' %}active{% endif %}">
+                                newest
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'veure_thread' thread.id 'oldest' %}"
+                               class="{% if request.session.order == 'oldest' %}active{% endif %}">
+                                oldest
+                            </a>
+                        </li>
+                    </menu>
+                </aside>
+                <div id="comment-add" class="section">
+                    <h3 hidden="">Añadir un comentario</h3>
+                    <form name="entry_comment" method="post" action="{% url 'add_comment' thread_id=thread.id %}"
+                          class="comment-add" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div><label for="entry_comment_6616cdb65f3850.74137319_body"></label><textarea
+                                id="entry_comment_6616cdb65f3850.74137319_body" name="entry_comment[body]"
+                                data-controller="input-length rich-textarea autogrow"
+                                data-action="input-length#updateDisplay" data-input-length-max-value="5000"
+                                style="overflow: hidden; height: 66px;"></textarea>
+                        </div>
+                        <div class="row actions">
+                            <ul>
+                                <li class="dropdown">
+                                    <div>
+                                        <button type="submit" id="entry_comment_6616cdb65f3850.74137319_submit"
+                                                name="entry_comment[submit]" class="btn btn__primary"
+                                                data-action="subject#sendForm">Add comment
+                                        </button>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+                <section id="comments" class="comments entry-comments comments-tree show-comment-avatar"
+                         data-controller="subject-list comments-wrap"
+                         data-action="notifications:EntryCommentCreatedNotification@window->subject-list#increaseCounter">
+                    {% load humanize %}
+                    {% for comment in comments_root %}
+                        {% include 'comments_tree.html' with comment=comment %}
+                    {% endfor %}
+                </section>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ca" style="font-size: 100%">
+<head>
+    <style type="text/css">.turbo-progress-bar {
+        position: fixed;
+        display: block;
+        top: 0;
+        left: 0;
+        height: 3px;
+        background: #0076ff;
+        z-index: 2147483647;
+        transition: width 300ms ease-out,
+        opacity 150ms 150ms ease-in;
+        transform: translate3d(0, 0, 0);
+    }
+    </style>
+    <title>kbin.social - Explore the Fediverse</title>
+    <link rel="icon" href="{% static '/ico/favicon.ico' %}" sizes="any">
+    <link rel="stylesheet" href="{% static '/css/824.b4cc3385.css' %}" data-turbo-track="reload">
+    <link rel="stylesheet" href="{% static '/css/app.910c0aab.css' %}" data-turbo-track="reload">
+</head>
+<body class="theme--light" data-controller="kbin notifications" data-turbo="false">
+
+
+{% include 'base.html' with actiu='threads'%}
+<div id="middle" class="page-entry-front">
+    <div class="kbin-container">
+        <main id="main" class="" data-controller="lightbox timeago">
+            <aside id="options" class="options options--top">
+                <menu class="options__main no-scroll">
+                    <li><a class="{% if active_option == 'top' %}active{% endif %}"
+                           href="/top/{{ active_filter }}">Top</a></li>
+                    <li><a class="{% if active_option == 'newest' %}active{% endif %}"
+                           href="/newest/{{ active_filter }}">Newest</a></li>
+                    <li><a class="{% if active_option == 'commented' %}active{% endif %}"
+                           href="/commented/{{ active_filter }}">Commented</a></li>
+                </menu>
+                <menu class="options__filters">
+                    <li class="dropdown">
+                        <button aria-label="Filtrar per tipus" title="Filtrar per tipus"><i
+                                class="fa-solid fa-filter"></i>
+                            Filter by type
+                        </button>
+                        <ul class="dropdown__menu">
+                            <li>
+                                <a href="/{{ active_option }}/tot"
+                                   class="{% if active_filter == 'tot' %}active{% endif %}">
+                                    Tot
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/{{ active_option }}/links"
+                                   class="{% if active_filter == 'links' %}active{% endif %}">
+                                    <!--     <a href="{{ request.path }}/Links "class="{% if active_filter == 'links' %}
+                                        active{% endif %}"> -->
+                                    Links
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/{{ active_option }}/threads"
+                                   class="{% if active_filter == 'threads' %}active{% endif %}">
+                                    Threads
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </menu>
+            </aside>
+            {% if eliminat %}
+                <div class="alert alert__success" role="alert">
+                    The thread has been successfully deleted.
+                </div>
+            {% endif %}
+            <div id="content">
+                {% for thread in threads %}
+                    {% include 'show_threads.html' %}
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

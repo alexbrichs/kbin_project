@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<article
+        class="entry section subject{% if thread.author.email == user.email %} own{% endif %}{% if single %} entry--single section--top{% endif %}">
+    <header>
+        <h1>
+            <a rel="nofollow noopener noreferrer" href="{% url 'veure_thread' thread.id 'top' %}">{{ thread.title }}</a>
+            {% if thread.url != None %}
+                <span class="entry__domain">
+                (<a href="https://{{ thread.url }}" target="_blank">{{ thread.url }} </a>)
+                </span>
+            {% endif %}
+        </h1>
+    </header>
+    {% if single %}
+        <div class="entry__body">
+            <div class="content formatted" style="">
+                <p>{{ thread.body }}</p>
+            </div>
+        </div>
+    {% endif %}
+    <aside class="meta entry__meta">
+        <a class="user-inline" href="/u/{{ thread.author_id }}">{{ thread.author_id }}</a>
+        <time class="timeago"
+              datetime="{{ thread.temps_desde_creacio }}">{{ thread.temps_desde_creacio }}</time>
+        <span> to </span>
+        <a href="/magazine/{{ thread.magazine.id }}" class="magazine-inline"
+           title="{{ thread.magazine.name }}">{{ thread.magazine.name }}</a>
+    </aside>
+    <aside class="vote">
+        <form action="{% url 'votar_thread' thread.id %}" name="votar_thread" method="post" class="vote__up">
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <input type="hidden" name="keyword" value="{{ request.GET.keyword }}">
+            <input type="hidden" name="vote_type" value="positiu">
+            <button type="submit" title="Vots positius" aria-label="Vots positius">
+                <span data-subject-target="favCounter">{{ thread.num_likes }}</span>
+                <span><i class="fa-solid fa-arrow-up"></i></span>
+            </button>
+        </form>
+        <form action="{% url 'votar_thread' thread.id %}" name="votar_thread" method="post" class="vote__down">
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <input type="hidden" name="keyword" value="{{ request.GET.keyword }}">
+            <input type="hidden" name="vote_type" value="negatiu">
+            <button type="submit" title="Vots negatius" aria-label="Vots negatius">
+                <span data-subject-target="downvoteCounter">{{ thread.num_dislikes }}</span> <span><i
+                    class="fa-solid fa-arrow-down"></i></span>
+            </button>
+        </form>
+    </aside>
+    <footer>
+        <menu>
+            <li>
+                <a class="stretched-link" href="{% url 'veure_thread' thread.id 'top' %}"><span
+                        data-subject-target="commentsCounter">{{ thread.num_coments }}</span> comments </a>
+            </li>
+            <li>
+                <form action="{% url 'boost_thread' thread.id %}" name="boost_thread" method="post">
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <input type="hidden" name="keyword" value="{{ request.GET.keyword }}">
+                    <button class="boost-link stretched-link" type="submit"
+                            data-action="subject#favourite">boost
+                        {% if thread.num_boosts != 0 %}
+                            <span class="" data-subject-target="upvoteCounter">({{ thread.num_boosts }})</span>
+                        {% endif %}
+                    </button>
+                </form>
+            </li>
+            {% if thread.author.email == user.email %}
+                <li>
+                    {% if thread.url == None or thread.url == '' %}
+                        <form action="{% url 'edit_thread' thread.id %}" name="edit_thread" method="get">
+                            <button class="boost-link stretched-link" type="submit"
+                                    data-action="subject#favourite">edit
+                            </button>
+                        </form>
+                    {% else %}
+                        <form action="{% url 'editar_link' thread.id %}" name="editar_link" method="get">
+                            <button class="boost-link stretched-link" type="submit"
+                                    data-action="subject#favourite">edit
+                            </button>
+                        </form>
+                    {% endif %}
+                </li>
+                <li>
+                    <form action="{% url 'eliminar_publicacio' thread.id %}" name="eliminar_publicacio"
+                          method="post">
+                        <button class="boost-link stretched-link" type="submit"
+                                data-action="subject#favourite">delete
+                        </button>
+                    </form>
+                </li>
+            {% endif %}
+        </menu>
+        <div data-subject-target="container" class="js-container">
+        </div>
+    </footer>
+</article>
+</html>

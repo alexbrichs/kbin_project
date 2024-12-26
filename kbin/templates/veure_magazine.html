@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ca" style="font-size: 100%">
+<head>
+    <style type="text/css">.turbo-progress-bar {
+        position: fixed;
+        display: block;
+        top: 0;
+        left: 0;
+        height: 3px;
+        background: #0076ff;
+        z-index: 2147483647;
+        transition: width 300ms ease-out,
+        opacity 150ms 150ms ease-in;
+        transform: translate3d(0, 0, 0);
+    }
+    </style>
+    <title>Magazine</title>
+    <link rel="icon" href="{% static '/ico/favicon.ico' %}" sizes="any">
+    <link rel="stylesheet" href="{% static '/css/824.b4cc3385.css' %}" data-turbo-track="reload">
+    <link rel="stylesheet" href="{% static '/css/app.910c0aab.css' %}" data-turbo-track="reload">
+</head>
+
+<body>
+{% include 'base.html' %}
+
+<div id="middle" class="page-user page-user-overview">
+    <div class="kbin-container">
+        <main id="main" data-controller="lightbox timeago" class="view-compact">
+            {% include 'section_magazine.html' %}
+            <aside class="options" id="options">
+                    <menu class="options__main no-scroll">
+                        <li><a class="{% if ordre == 'top' %}active{% endif %}"
+                               href="{% url 'veure_magazine_top' magazine.id active_filter %}">Top</a></li>
+                        <li><a class="{% if ordre == 'newest' or ordre == None  %}active{% endif %}"
+                               href="{% url 'veure_magazine_newest' magazine.id active_filter %}">Newest</a></li>
+                        <li><a class="{% if ordre == 'comment' %}active{% endif %}"
+                               href="{% url 'veure_magazine_comments' magazine.id active_filter %}">Commented</a>
+                        </li>
+                    </menu>
+
+                    <menu class="options__filters">
+                        <li class="dropdown">
+                            <button aria-label="Filtrar per tipus" title="Filtrar per tipus"><i
+                                    class="fa-solid fa-filter"></i>
+                                Filtrar per tipus
+                            </button>
+                            <ul class="dropdown__menu">
+                                <li>
+                                    <a href="{% url 'veure_magazine_newest' magazine.id 'tot' %}"
+                                       class="{% if active_filter == 'tot' or active_filter == None%}active{% endif %}">
+                                        Tot
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'veure_magazine_newest' magazine.id 'links' %}"
+                                       class="{% if active_filter == 'links' %}active{% endif %}">
+                                        <!--     <a href="{{ request.path }}/Links "class="
+                                                    {% if active_filter == 'links' %}
+                                        active{% endif %}"> -->
+                                        Links
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'veure_magazine_newest' magazine.id 'threads' %}"
+                                       class="{% if active_filter == 'threads' %}active{% endif %}">
+                                        Threads
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </menu>
+                </aside>
+                <div id="content">
+                    {% if threads|length == 0 %}
+                        <aside class="section section--muted">
+                            <p>Empty</p>
+                        </aside>
+                    {% else %}
+                        {% for thread in threads %}
+                            {% include 'show_threads.html' %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+        </main>
+    </div>
+</div>
+
+
+</body>
+</html>

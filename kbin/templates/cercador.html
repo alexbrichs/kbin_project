@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ca" style="font-size: 100%">
+<head>
+    <style type="text/css">.turbo-progress-bar {
+        position: fixed;
+        display: block;
+        top: 0;
+        left: 0;
+        height: 3px;
+        background: #0076ff;
+        z-index: 2147483647;
+        transition: width 300ms ease-out,
+        opacity 150ms 150ms ease-in;
+        transform: translate3d(0, 0, 0);
+    }
+    </style>
+    <title>kbin.social - Explore the Fediverse</title>
+    <link rel="icon" href="{% static '/ico/favicon.ico' %}" sizes="any">
+    <link rel="stylesheet" href="{% static '/css/824.b4cc3385.css' %}" data-turbo-track="reload">
+    <link rel="stylesheet" href="{% static '/css/app.910c0aab.css' %}" data-turbo-track="reload">
+</head>
+<body class="theme--light" data-controller="kbin notifications" data-turbo="false">
+
+
+{% include 'base.html' %}
+<div id="middle" class="page-search page-settings">
+    <div class="kbin-container">
+        <main id="main" data-controller="lightbox timeago" class="view-compact">
+            <div class="section section--top">
+                <div class="container">
+                    <form method="post" action="/cercador">
+                        <div class="flex" style="align-items: center">
+                            <input value="{% if request.GET.keyword %}{{ request.GET.keyword }}{% else %}{{ request.POST.keyword }}{% endif %}"name="keyword" type="text" class="form-control" placeholder="Type search term"
+                                   autofocus="">
+                            <button class="btn btn__primary" type="submit" aria-label="Search">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% if es_cerca %}
+                <aside class="options options--top" id="options">
+                    <div></div>
+                    <menu class="options__main no-scroll">
+                        <li><a class="{% if active_option == 'top' %}active{% endif %}" href="/cercador/top/{{ active_filter }}?keyword={% if request.GET.keyword %}{{ request.GET.keyword }}{% else %}{{ request.POST.keyword }}{% endif %}">Top</a></li>
+                        <li><a class="{% if active_option == 'newest' %}active{% endif %}" href="/cercador/newest/{{ active_filter }}?keyword={% if request.GET.keyword %}{{ request.GET.keyword }}{% else %}{{ request.POST.keyword }}{% endif %}">Newest</a></li>
+                        <li><a class="{% if active_option == 'commented' %}active{% endif %}" href="/cercador/commented/{{ active_filter }}?keyword={% if request.GET.keyword %}{{ request.GET.keyword }}{% else %}{{ request.POST.keyword }}{% endif %}">Commented</a></li>
+                    </menu>
+                    <menu class="options__filters">
+                        <li class="dropdown">
+                            <button aria-label="Filtrar per tipus" title="Filtrar per tipus">
+                                <i class="fa-solid fa-filter"></i>Filter by type
+                            </button>
+                            <ul class="dropdown__menu">
+                                <li><a href="/cercador/{{ active_option }}/tot?keyword={{ request.GET.keyword }}" class="{% if active_filter == 'tot' %}active{% endif %}">Tot</a></li>
+                                <li><a href="/cercador/{{ active_option }}/links?keyword={{ request.GET.keyword }}" class="{% if active_filter == 'links' %}active{% endif %}">Links</a></li>
+                                <li><a href="/cercador/{{ active_option }}/threads?keyword={{ request.GET.keyword }}" class="{% if active_filter == 'threads' %}active{% endif %}">Threads</a></li>
+                            </ul>
+                        </li>
+                    </menu>
+                </aside>
+                <div id="content" class="overview subjects comments-tree comments show-post-avatar">
+                    {% if num_publicacions == 0 %}
+                        <aside class="section section--muted">
+                            <p>Empty</p>
+                        </aside>
+                    {% else %}
+                        {% for thread in threads %}
+                            {% include 'show_threads.html' %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endif %}
+        </main>
+    </div>
+
+
+</div>
+</body>
+</html>

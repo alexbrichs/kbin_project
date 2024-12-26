@@ -1,0 +1,2371 @@
+openapi: 3.0.2
+info:
+  version: 1.0.0
+  title: API Kbin.social
+  description: "Aquesta es la documentació Open API de la API REST de l'aplicació de Kbin desplegada a Heroku."
+servers:
+  - url: 'https://bravo13-36a68ba47d34.herokuapp.com/api'
+  - url: 'http://127.0.0.1:8000/api/'
+tags:
+  - name: User
+    description: Tot sobre Users
+  - name: Magazines
+    description: Tot sobre Magazines
+  - name: Publicacions
+    description: Tot sobre Publicacions
+  - name: Thread
+    description: Tot sobre Threads
+  - name: Link
+    description: Tot sobre Links
+  - name: Comment
+    description: Tot sobre Comments
+paths:
+  # PUBLICACIONS -------------------------------------------------------------------------------------
+  /llistar/publicacions/{ordre}/:
+    get:
+      tags:
+        - Publicacions
+      summary: Obté totes les publicacions ordenades segons el valor del parametre "ordre"
+      operationId: LlistarPublicacions
+      parameters:
+        - in: path
+          name: ordre
+          required: true
+          schema:
+            type: string
+            enum: [ 'newest', 'top', 'commented' ]
+            description: Ordre a seguir per a ordenar les publicacions
+      responses:
+        200:
+          description: Publicacions obtingudes correctament.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: '#/components/schemas/Thread'
+                    - $ref: '#/components/schemas/Link'
+        404:
+          description: "Error: El recurs demanat no s'ha trobat"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdreNotFoundError'
+
+
+  /publicacions/votar/{id_publicacio}/{tipus_vot}/:
+    post:
+      tags:
+        - Publicacions
+      summary: Si s'ha indicat un token, i aquest correspon a un usuari registrat aleshores, l'usuari al que li pertany el token, valora la publicació segons el "tipus_vot". Si l'usuari ja havia votat la publicació, el nou vot es del tipus indicat en "tipus_vot". Es retorna la informació de la publicació que s'ha votat
+      operationId: likePublicacio
+      parameters:
+        - name: id_publicacio
+          in: path
+          description: ID de la publicació a valorar
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: tipus_vot
+          in: path
+          description: Tipus de vot que es vol emetre
+          required: true
+          schema:
+            type: string
+            enum: [ 'like','dislike' ]
+      responses:
+        200:
+          description: Vot actualitzat correctament.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Link'
+                  - $ref: '#/components/schemas/Thread'
+        201:
+          description: Vot creat correctament.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Thread'
+                  - $ref: '#/components/schemas/Link'
+
+        401:
+          description: 'Error: Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error401'
+        403:
+          description: 'Error: Forbidden'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+        404:
+          description: 'Error: Publicació no trobada'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error404'
+      security:
+        - ApiKeyAuth: [ ]
+
+    delete:
+      tags:
+        - Publicacions
+      summary: Si s'ha indicat un token, i aquest correspon a un usuari registrat, aleshores elimina el vot si l'usuari, al que li pertany el token, ja havia votat previament la publicació amb id = "id_publicacio" i el vot era de tipus indicat en "tipus_vot"
+      operationId: deleteLike
+      parameters:
+        - name: id_publicacio
+          in: path
+          description: ID de la publicació a valorar
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: tipus_vot
+          in: path
+          description: Tipus de vot que es vol eliminar
+          required: true
+          schema:
+            type: string
+            enum: [ 'like','dislike' ]
+      responses:
+        204:
+          description: Vot eliminat correctament
+
+        401:
+          description: 'Error: Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error401'
+        403:
+          description: 'Error: Forbidden'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+        404:
+          description: 'Error: Publicació no trobada'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error404'
+      security:
+        - ApiKeyAuth: [ ]
+
+  /cercador/publicacions/{ordre}/:
+    get:
+      tags:
+        - Publicacions
+      summary: Obté totes les publicacions (tant threads com links), que contenen la keyword indicada (en el titol o el body), ordenades segons el valor del parametre "ordre"
+      operationId: CercarPublicacions
+      parameters:
+        - in: path
+          name: ordre
+          required: true
+          schema:
+            type: string
+            enum: [ 'newest', 'top', 'commented' ]
+            description: Ordre a seguir per a ordenar les publicacions
+        - in: header
+          name: keyword
+          required: true
+          schema:
+            type: string
+          description: Keyword que s'ha de cercar en el titol i el body de les publicacions.
+      responses:
+        '200':
+          description: Cerca feta correctament.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publicacions:
+                    type: array
+                    items:
+                      oneOf:
+                        - $ref: '#/components/schemas/Thread'
+                        - $ref: '#/components/schemas/Link'
+        '404':
+          description: El recurs demanat no s'ha trobat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdreNotFoundError'
+
+  /publicacions/{id_publicacio}/:
+    get:
+      tags:
+        - Publicacions
+      summary: Retorna la informació de la publicació amb id = "id_publicacio"
+      operationId: obtePublicacio
+      parameters:
+        - name: id_publicacio
+          in: path
+          description: ID de la publicació
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Publicació trobada.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Link'
+                  - $ref: '#/components/schemas/Thread'
+        404:
+          description: 'Error: Publicació no trobada'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicacioNotFoundError'
+
+    delete:
+      tags:
+        - Publicacions
+      summary: Si s'ha indicat un token, i aquest correspon a un usuari registrat, aleshores elimina la publicació amb id = "id_publicacio" si l'usuari indicat amb el token es el creador de la publicació
+      operationId: EliminarPublicacio
+      parameters:
+        - name: id_publicacio
+          in: path
+          description: ID de la publicació
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        204:
+          description: Publicació eliminada correctament
+
+        401:
+          description: 'Error: Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error401'
+        403:
+          description: 'Error: Forbidden'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+        404:
+          description: 'Error: Publicació no trobada'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error404'
+      security:
+        - ApiKeyAuth: [ ]
+
+    put:
+      tags:
+        - Publicacions
+      summary: Si s'ha indicat un token, i aquest correspon a un usuari registrat, aleshores edita la publicació amb id = "id_publicacio" si l'usuari indicat amb el token es el creador de la publicació
+      operationId: EditarPublicacio
+      parameters:
+        - name: id_publicacio
+          in: path
+          description: ID de la publicació a editar
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Indicar titol i/o body de la publicació que es vol editar.
+        content:
+          application/json:
+            schema:
+              required:
+                - Titol
+                - body
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  example: 'Titol del link'
+                body:
+                  type: string
+                  example: "Body del link"
+        required: true
+      responses:
+        200:
+          description: Publicació editada correctament.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publicacions:
+                    type: object
+                    oneOf:
+                      - $ref: '#/components/schemas/Thread'
+                      - $ref: '#/components/schemas/Link'
+
+        400:
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    mensaje: "Error: El titol de la publicació no pot ser buit."
+        401:
+          description: 'Error: Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error401'
+        403:
+          description: 'Error: Forbidden'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+        404:
+          description: 'Error: Publicació no trobada'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error404'
+      security:
+        - ApiKeyAuth: [ ]
+
+  /publicacions/boost/{id_publicacio}/:
+    post:
+      tags:
+        - Publicacions
+      summary: Si s'ha indicat un token, i aquest correspon a un usuari registrat aleshores, l'usuari al que li pertany el token, impulsa la publicació amb id = "id_publicacio". Si l'usuari ja havia impulsat la publicació, no es canvia l'estat del sistema
+      operationId: ImpulsarPublicacio
+      parameters:
+        - name: id_publicacio
+          in: path
+          description: ID de la publicació a impulsar
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: L'usuari ja havia impulsat la publicació.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publicacions:
+                    type: array
+                    items:
+                      oneOf:
+                        - $ref: '#/components/schemas/Thread'
+                        - $ref: '#/components/schemas/Link'
+        201:
+          description: Publicació impulsada correctament.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publicacions:
+                    type: array
+                    items:
+                      oneOf:
+                        - $ref: '#/components/schemas/Thread'
+                        - $ref: '#/components/schemas/Link'
+
+        401:
+          description: 'Error: Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error401'
+        403:
+          description: 'Error: Forbidden'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+        404:
+          description: 'Error: Publicació no trobada'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error404'
+      security:
+        - ApiKeyAuth: [ ]
+
+    delete:
+      tags:
+        - Publicacions
+      summary: Si s'ha indicat un token, i aquest correspon a un usuari registrat aleshores, l'usuari al que li pertany el token, elimina l'impuls la publicació amb id = "id_publicacio".
+      operationId: EliminarBoost
+      parameters:
+        - name: id_publicacio
+          in: path
+          description: ID de la publicació a eliminar impuls
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        204:
+          description: Impuls eliminat correctament
+
+        401:
+          description: 'Error: Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error401'
+        403:
+          description: 'Error: Forbidden'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+        404:
+          description: "Error: El recurs demanat no s'ha trobat"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error404'
+      security:
+        - ApiKeyAuth: [ ]
+
+  # THREADS -------------------------------------------------------------------------------------------
+  /llistar/threads/{ordre}/:
+    get:
+      tags:
+        - Thread
+      summary: Obté tote els threads ordenats segons el valor del parametre "ordre".
+      operationId: LlistarThreads
+      parameters:
+        - in: path
+          name: ordre
+          required: true
+          schema:
+            type: string
+            enum: [ 'newest', 'top', 'commented' ]
+            description: Ordre a seguir per a ordenar els threads
+      responses:
+        200:
+          description: Threads obtinguts correctament.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  threads:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Thread'
+        404:
+          description: "Error: El recurs demanat no s'ha trobat"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdreNotFoundError'
+
+  /threads/:
+    post:
+      tags:
+        - Thread
+      summary: Si s'ha indicat un token, i aquest correspon a un usuari registrat, aleshores afegeix un nou thread a la aplicació i retorna la informació del thread creat.
+      operationId: AfegirThread
+      requestBody:
+        description: Indicar titol, body i ID de la magazine. El títol no pot ser un string buit i la magazine ha d'existir
+        content:
+          application/json:
+            schema:
+              required:
+                - Titol
+                - Body
+                - Nom magazine
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  example: 'Titol del thread'
+                body:
+                  type: string
+                  minLength: 0
+                  maxLength: 280 #TODO: MIRAR BÉ QUIN LIMIT
+                  example: 'Body del thread'
+                magazine:
+                  type: integer
+                  example: 1
+        required: true
+      responses:
+        201:
+          description: Thread creat correctament.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NouThread'
+        400:
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    mensaje: "Error: Falten atributs. Cal indicar titol, body i magazine del thread a crear."
+
+        403:
+          description: 'Error: Forbidden'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+      security:
+        - ApiKeyAuth: [ ]
+
+
+  /cercador/threads/{ordre}/:
+    get:
+      tags:
+        - Thread
+      summary: Obté tots els threads, que contenen la keyword indicada, ordenats segons el valor del parametre "ordre"
+      operationId: CercarThreads
+      parameters:
+        - in: path
+          name: ordre
+          required: true
+          schema:
+            type: string
+            enum: [ 'newest', 'top', 'commented' ]
+            description: Ordre a seguir per a ordenar els threads
+        - in: header
+          name: keyword
+          required: true
+          schema:
+            type: string
+          description: Keyword que s'ha de cercar en el titol i el cos dels threads
+      responses:
+        200:
+          description: Cerca feta correctament.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publicacions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Thread'
+        404:
+          description: "Error: El recurs demanat no s'ha trobat"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdreNotFoundError'
+
+  # LINKS --------------------------------------------------------------------------------------------
+  /llistar/links/{ordre}/:
+    get:
+      tags:
+        - Link
+      summary: Obté tots els links ordenats segons el valor del parametre "ordre".
+      operationId: LlistarLinks
+      parameters:
+        - in: path
+          name: ordre
+          required: true
+          schema:
+            type: string
+            enum: [ 'newest', 'top', 'commented' ]
+            description: Ordre a seguir per a ordenar els threads
+      responses:
+        200:
+          description: Links obtinguts correctament.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Link'
+        404:
+          description: "Error: El recurs demanat no s'ha trobat"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdreNotFoundError'
+
+
+  /links/:
+    post:
+      tags:
+        - Link
+      summary: Si s'ha indicat un token, i aquest correspon a un usuari registrat, aleshores afegeix un nou link a la aplicació i retorna la informació del link creat.
+      operationId: AfegirLink
+      requestBody:
+        description: Indicar titol, nom del magazine, url i body del link a crear. Ni el títol ni la url poden ser un string buit i la magazine ha d'existir.
+        content:
+          application/json:
+            schema:
+              required:
+                - Titol
+                - Nom magazine
+                - url
+                - body
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  example: 'Titol del link'
+                url:
+                  type: string
+                  minLength: 0
+                  maxLength: 280 #TODO: MIRAR BÉ QUIN LIMIT
+                  example: 'www.raco.fib.upc.edu'
+                magazine:
+                  type: integer
+                  example: 1
+                body:
+                  type: string
+                  example: "Body del link"
+        required: true
+      responses:
+        201:
+          description: Link creat correctament.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Link'
+        400:
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    mensaje: "Error: Falten atributs. Cal indicar titol, body i magazine del link a crear."
+
+        401:
+          description: 'Error: Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error401'
+
+        403:
+          description: 'Error: Forbidden'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+      security:
+        - ApiKeyAuth: [ ]
+
+  /cercador/links/{ordre}/:
+    get:
+      tags:
+        - Link
+      summary: Obté tots els links, que contenen la keyword indicada (en el titol o en el body), ordenats segons el valor del parametre "ordre".
+      operationId: CercarLinks
+      parameters:
+        - in: path
+          name: ordre
+          required: true
+          schema:
+            type: string
+            enum: [ 'newest', 'top', 'commented' ]
+            description: Ordre a seguir per a ordenar els links
+        - in: header
+          name: keyword
+          required: true
+          schema:
+            type: string
+          description: Keyword que s'ha de cercar en el titol i el body dels links
+      responses:
+        200:
+          description: Cerca feta correctament.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publicacions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Link'
+        404:
+          description: "Error: El recurs demanat no s'ha trobat"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdreNotFoundError'
+
+
+   # USERS --------------------------------------------------------------------------------------------
+  /users/:
+    get:
+      tags:
+        - User
+      summary: Obtenir la informació bàscia de tots els users
+      responses:
+        '200':
+          description: Users obtinguts correctament
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+      security:
+        - ApiKeyAuth: [ ]
+
+  /u/{username}/:
+    get:
+      tags:
+        - User
+      summary: Obtenir la informació bàsica del User
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User obtingut correctament
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '404':
+          description: "Error: Not found"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFoundError'
+      security:
+        - ApiKeyAuth: [ ]
+
+  /u/{username}/{element}/{ordre}/{filtre}/:
+    get:
+      tags:
+        - User
+      summary: Obtenir info d'un user més les publicacions que ha fet, threads i links, ordenats per data de creació
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+          description: Nom de l'user
+        - in: path
+          name: element
+          required: true
+          schema:
+            type: string
+            enum: [ 'threads', 'boosts' ]
+          description: Nom de l'user
+        - in: path
+          name: ordre
+          required: true
+          schema:
+            type: string
+            enum: [ 'newest', 'top', 'commented' ]
+          description: Ordre a seguir per a ordenar els comentaris
+        - in: path
+          name: filtre
+          required: true
+          schema:
+            type: string
+            enum: [ 'tot', 'threads', 'links' ]
+          description: Filtre per indicar quin tipus de comentaris s'obte
+      responses:
+        '200':
+          description: Informació de l'usuari obtinguda correctament
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  data:
+                    type: array
+                    items:
+                      # Cada element de l'array pot ser un dels dos tipus següents
+                      oneOf:
+                        - $ref: '#/components/schemas/Thread'
+                        - $ref: '#/components/schemas/Link'
+        '401':
+          description: No s'ha indicat un token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    error: Es necessari indicar el token del usuari
+        '403':
+          description: El token no correspon amb l'usuari
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    error: El token no correspon a l'usuari
+        '404':
+          description: El recurs demanat no s'ha trobat
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/FiltreNotFoundError'
+                  - $ref: '#/components/schemas/OrdreNotFoundError'
+                  - $ref: '#/components/schemas/UserNotFoundError'
+      security:
+        - ApiKeyAuth: [ ]
+
+  /u/{username}/comments/{ordre}/{filtre}/:
+    get:
+      tags:
+        - User
+      summary: Obtenir la informació d'un user més els seus comentaris. Es mostren els comentaris  fets sobre threads i/o links depenent del filtre i ordenats segons ordre
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+          description: Nom de l'user
+        - in: path
+          name: ordre
+          required: true
+          schema:
+            type: string
+            enum: [ 'newest', 'top', 'oldest' ]
+          description: Ordre a seguir per a ordenar els comentaris
+        - in: path
+          name: filtre
+          required: true
+          schema:
+            type: string
+            enum: [ 'tot', 'threads', 'links' ]
+          description: Filtre per indicar quin tipus de comentaris s'obte
+      responses:
+        '200':
+          description: Informació de l'usuari obtinguda correctament
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+        '404':
+          description: El recurs demanat no s'ha trobat
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/FiltreNotFoundError'
+                  - $ref: '#/components/schemas/OrdreNotFoundError'
+                  - $ref: '#/components/schemas/UserNotFoundError'
+      security:
+        - ApiKeyAuth: [ ]
+
+  /settings/{username}/:
+    put:
+      tags:
+        - User
+      summary: Editar la informació de l'user
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+          description: Nom d'user
+      requestBody:
+        description: Indicar descripció
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  minLength: 1
+                  example: 'Descripció del user'
+                cover:
+                  type: string
+                  format: binary
+                  example: 'cover image'
+                avatar:
+                  type: string
+                  format: binary
+                  example: 'avatar image'
+        required: true
+      responses:
+        '201':
+          description: Informació de l'usuari modificada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: "Error: Bad request"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenUserNotMatchError'
+        '401':
+          description: "Error: Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenNotFoundError'
+        '404':
+          description: "Error: Not found"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFoundError'
+      security:
+        - ApiKeyAuth: [ ]
+
+  /vots/:
+    get:
+      tags:
+        - User
+      summary: Obté tots els vots fets per l'usuari indicat en el token que s'envia a la petició
+
+      responses:
+        '200':
+          description: Informació dels vots obtinguda correctament
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vots:
+                    $ref: '#/components/schemas/Vot'
+
+        '401':
+          description: No s'ha indicat un token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    error: Es necessari indicar el token del usuari
+
+        '403':
+          description: El token no correspon amb cap usuari
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    error: El token no correspon a cap usuari registrat
+      security:
+        - ApiKeyAuth: [ ]
+
+
+  /boosts/:
+    get:
+      tags:
+        - User
+      summary: Obté tots els boosts fets per l'usuari indicat en el token que s'envia a la petició
+
+      responses:
+        '200':
+          description: Informació dels boosts obtinguda correctament
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vots:
+                    $ref: '#/components/schemas/Boost'
+
+        '401':
+          description: No s'ha indicat un token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    error: Es necessari indicar el token del usuari
+
+        '403':
+          description: El token no correspon amb cap usuari
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    error: El token no correspon a cap usuari registrat
+      security:
+        - ApiKeyAuth: [ ]
+
+  /comments/vots/:
+    get:
+      tags:
+        - User
+      summary: Obté tots els vots a comentaris fets per l'usuari indicat en el token que s'envia a la petició
+
+      responses:
+        '200':
+          description: Informació dels vots obtinguda correctament
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vots:
+                    $ref: '#/components/schemas/VotComentari'
+
+        '401':
+          description: No s'ha indicat un token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    error: Es necessari indicar el token del usuari
+
+        '403':
+          description: El token no correspon amb cap usuari
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    error: El token no correspon a cap usuari registrat
+      security:
+        - ApiKeyAuth: [ ]
+
+
+  # COMMENTS --------------------------------------------------------------------
+  /publicacions/{id_publicacio}/comments/{ordre}:
+    get:
+      tags:
+        - Comment
+      summary: Obtenir tots els comentaris d'una publicació
+      parameters:
+        - in: path
+          name: id_publicacio
+          required: true
+          schema:
+            type: integer
+          description: ID de la publicació
+        - in: path
+          name: ordre
+          required: true
+          schema:
+            type: string
+            enum: [ 'top', 'newest', 'oldest' ]
+          description: Ordre a seguir per a ordenar els comentaris
+      responses:
+        '200':
+          description: Comentaris obtinguts correctament
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '404':
+          description: No existeix una publicació amb aquesta ID
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PublicacioNotFoundError'
+                  - $ref: '#/components/schemas/OrdreNotFoundError'
+
+  /publicacions/{id_publicacio}/create_comment/:
+    post:
+      tags:
+        - Comment
+      summary: Si s'ha indicat un token, i aquest correspon a un usuari registrat, aleshores afegeix un nou comentari a la publicació indicada i retorna la informació del comentari creat.
+      security:
+        - ApiKeyAuth: [ ]
+      parameters:
+        - in: path
+          name: id_publicacio
+          required: true
+          schema:
+            type: integer
+          description: ID de la publicació
+      requestBody:
+        description: Indicar el contingut del comentari
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body:
+                  type: string
+                  description: Contingut del comentari
+                  example: "Aquest és el body del comentari"
+      responses:
+        '201':
+          description: Comentari creat correctament
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NouComment'
+              examples:
+                commentExample:
+                  value:
+                    id: 3
+                    author: "user123"
+                    body: "Aquest és el body del comentari"
+                    creation_data: "2024-03-29T00:00:00Z"
+                    last_edited: null
+                    num_likes: 0
+                    num_dislikes: 0
+                    level: 1
+                    parent: "http://127.0.0.1:8000/api/threads/2/"
+                    replies: [ ]
+        '400':
+          description: No s'ha pogut crear el comentari. Falta el contingut del comentari
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    error: Falten atributs. Cal indicar el body del comentari a crear.
+        '401':
+          description: Es necessari indicar el token de l'usuari
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error401'
+        '403':
+          description: El token no correspon amb cap usuari registrat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFoundError'
+        '404':
+          description: No existeix una publicacio amb aquesta ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicacioNotFoundError'
+
+  /comments/create_reply/{id_comment}/:
+    post:
+      tags:
+        - Comment
+      summary: Si s'ha indicat un token, i aquest correspon a un usuari registrat, aleshores afegeix una nova resposta al comentari indicat i retorna la informació del comentari orígen amb totes les seves respostes.
+      security:
+        - ApiKeyAuth: [ ]
+      parameters:
+        - in: path
+          name: id_comment
+          required: true
+          schema:
+            type: integer
+          description: ID del comentari a respondre
+      requestBody:
+        description: Indicar el contingut del comentari resposta
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body:
+                  type: string
+                  description: Contingut del comentari resposta
+                  example: "Aquest és el body del comentari resposta"
+      responses:
+        '201':
+          description: Resposta creada correctament
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/Comment'
+
+        '400':
+          description: No s'ha pogut crear el comentari resposta. Falta el body de la resposta.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    error: Falten atributs. Cal indicar el body de la resposta a crear.
+
+        '401':
+          description: Es necessari indicar el token de l'usuari
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error401'
+        '403':
+          description: El token no correspon a cap usuari registrat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFoundError'
+        '404':
+          description: No existeix un comentari amb aquesta ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentNotFoundError'
+
+  /comments/vote/{id_comment}/{tipus_vot}/:
+    post:
+      tags:
+        - Comment
+      summary: Si s'ha indicat un token, i aquest correspon a un usuari registrat aleshores, l'usuari al que li pertany el token, valora el comentari segons el "tipus_vot". Si l'usuari ja havia votat, el nou vot es del tipus indicat en "tipus_vot"
+      parameters:
+        - name: id_comment
+          in: path
+          description: ID del comentari a valorar
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: tipus_vot
+          in: path
+          description: Tipus de vot que es vol emetre
+          required: true
+          schema:
+            type: string
+            enum: [ 'like','dislike' ]
+      responses:
+        '200':
+          description: Operació correcte.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+              examples:
+                commentExample:
+                  value:
+                    id: 3
+                    author: "user123"
+                    body: "Aquest és el body del comentari"
+                    creation_data: "2024-03-29T00:00:00Z"
+                    last_edited: null
+                    num_likes: 1
+                    num_dislikes: 0
+                    level: 1
+                    parent: "http://127.0.0.1:8000/api/threads/2/"
+                    replies: [ ]
+        '201':
+          description: Vot emès correctament
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+              examples:
+                commentExample:
+                  value:
+                    id: 3
+                    author: "user123"
+                    body: "Aquest és el body del comentari"
+                    creation_data: "2024-03-29T00:00:00Z"
+                    last_edited: null
+                    num_likes: 1
+                    num_dislikes: 0
+                    level: 1
+                    parent: "http://127.0.0.1:8000/api/threads/2/"
+                    replies: [ ]
+        '401':
+          description: No s'ha indicat el token de l'usuari.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error401'
+        '403':
+          description: El token no correspon a cap usuari registrat.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+        '404':
+          description: Comentari no existeix
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentNotFoundError'
+      security:
+        - ApiKeyAuth: [ ]
+
+    delete:
+      tags:
+        - Comment
+      summary: Si s'ha indicat un token, i aquest correspon a un usuari registrat, aleshores elimina el vot si l'usuari, al que li pertany el token, ja havia votat prèviament el comentari amb id = "id_comment" i el vot era del tipus indicat en "tipus_vot"
+      parameters:
+        - name: id_comment
+          in: path
+          description: ID del comentari a eliminar la valoració
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: tipus_vot
+          in: path
+          description: Tipus de vot que es vol eliminar
+          required: true
+          schema:
+            type: string
+            enum: [ 'like','dislike' ]
+      responses:
+        '204':
+          description: Vot eliminat correctament
+        '400':
+          description: L'usuari no havia votat prèviament el comentari amb "tipus_vot".
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VotNoCoincideixError'
+        '401':
+          description: No s'ha indicat el token de l'usuari.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error401'
+        '403':
+          description: El token no correspon a cap usuari registrat.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+        '404':
+          description: Comentari no existeix o no té cap vot
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/CommentNotFoundError'
+                  - $ref: '#/components/schemas/VotNotFoundError'
+      security:
+        - ApiKeyAuth: [ ]
+
+  /comments/{id_comment}/:
+    get:
+      tags:
+        - Comment
+      summary: Retorna la informació del comentari amb id = "id_comment"
+      operationId: obteComment
+      parameters:
+        - name: id_comment
+          in: path
+          description: ID del comentari
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Comentari obtingut correctament.
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Comment'
+                example:
+                  id: 2
+                  author: "user123"
+                  body: "Aquest és el body del comentari resposta"
+                  creation_data: "2024-03-29T00:00:00Z"
+                  last_edited: null
+                  num_likes: 0
+                  num_dislikes: 0
+                  level: 2
+                  parent: "http://127.0.0.1:8000/api/threads/2/"
+                  replies: [ ]
+        '404':
+          description: No existeix un comentari amb aquesta ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentNotFoundError'
+    delete:
+      tags:
+        - Comment
+      summary: Si s'ha indicat un token, i aquest correspon a un usuari registrat, aleshores elimina el comentari amb id = "id_comment" si l'usuari indicat amb el token es el creador i totes les seves respostes.
+      operationId: EliminarComment
+      parameters:
+        - name: id_comment
+          in: path
+          description: ID del comentari a eliminar
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Comentari eliminat correctament
+        '401':
+          description: 'Error: Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error401'
+        '403':
+          description: 'Error: Forbidden'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+        '404':
+          description: 'Error: Comentari no trobat'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentNotFoundError'
+      security:
+        - ApiKeyAuth: [ ]
+
+    put:
+      tags:
+        - Comment
+      summary: Si s'ha indicat un token, i aquest correspon a un usuari registrat, aleshores actualitza el body del comentari amb id = "id_comment" si l'usuari indicat amb el token es el creador.
+      operationId: ActualitzarComment
+      parameters:
+        - name: id_comment
+          in: path
+          description: ID del comentari a actualitzar
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Indicar el contingut del comentari a editar
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body:
+                  type: string
+                  description: Contingut del comentari a editar
+                  example: "Aquest és el body del comentari editat"
+      responses:
+        '201':
+          description: Comentari modificat correctament
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+              examples:
+                commentExample:
+                  value:
+                    id: 3
+                    author: "user123"
+                    body: "Aquest és el body del comentari"
+                    creation_data: "2024-03-29T00:00:00Z"
+                    last_edited: "2024-04-19T00:00:00Z"
+                    num_likes: 1
+                    num_dislikes: 0
+                    level: 1
+                    parent: "http://127.0.0.1:8000/api/threads/2/"
+                    replies: [ ]
+
+        '400':
+          description: 'Error: Falten atributs. Cal indicar el body del comentari a modificar o el body indicat es igual al del comentari.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    error: Falten atributs. Cal indicar el body del comentari a modificar.
+        '401':
+          description: 'Error: Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error401'
+        403:
+          description: 'Error: Forbidden'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+        404:
+          description: 'Error: Comentari no trobat'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentNotFoundError'
+      security:
+        - ApiKeyAuth: [ ]
+
+  # MAGAZINES -------------------------------------------------------------------
+  /magazines/{order}/:
+    get:
+      tags:
+        - Magazines
+      summary: Obté totes les magazines, ordenades segons el paràmetre order del path
+      operationId: SuscripcioCreacio
+      parameters:
+        - in: path
+          name: order
+          required: true
+          schema:
+            type: string
+            enum: [ 'threads', 'elements', 'commented', 'suscriptions' ]
+            description: ordenació que volem aplicar a les magazines obtingudes
+      responses:
+        '200':
+          description: Operació correcte.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  magazines:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Magazine'
+      security:
+        - ApiKeyAuth: [ ]
+
+  /magazine/{id_magazine}/:
+    get:
+      tags:
+        - Magazines
+      summary: Retorna la informació de una magazine
+      operationId: VeureMagazine
+      parameters:
+        - in: path
+          name: id_magazine
+          required: true
+          schema:
+            type: string
+          description: Id de la magazine que volem consultar
+      responses:
+        '200':
+          description: Operació correcte.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Magazine'
+
+        '404':
+          description: No existeix una magazine amb id_magazine
+          content:
+            applicatin/json:
+              schema:
+                $ref: '#/components/schemas/MagazineNotFoundError'
+
+
+  /magazine/{id_magazine}/{filter}/{order}/:
+    get:
+      tags:
+        - Magazines
+      summary: Retorna les publicacions relacionades amb la magazine identificada amb id_magazine, ordendades segons el paràmetre order i filtrades pel paràmetre filter
+      operationId: ObtenirPublicacionsMagazine
+      parameters:
+        - in: path
+          name: id_magazine
+          required: true
+          schema:
+            type: string
+          description: Id de la magazine que es vol consultar
+        - in: path
+          name: filter
+          required: true
+          schema:
+            type: string
+            enum: [ 'links', 'threads', 'publicacions' ]
+          description: Filtre que es vol aplicar a les publicacions que es retornin
+        - in: path
+          name: order
+          required: true
+          schema:
+            type: string
+            enum: [ 'newest', 'top', 'commented' ]
+          description: Ordenació que es vol aplicar a les publicacions que es retornin
+      responses:
+        '200':
+          description: Publicacions de la magazine obtingudes correctament
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      # Cada element de l'array pot ser un dels dos tipus següents
+                      oneOf:
+                        - $ref: '#/components/schemas/Thread'
+                        - $ref: '#/components/schemas/Link'
+
+        '404':
+          description: No existeix una magazine amb id_magazine
+          content:
+            applicatin/json:
+              schema:
+                $ref: '#/components/schemas/MagazineNotFoundError'
+
+  /magazines/:
+    post:
+      tags:
+        - Magazines
+      summary: Crea una magazine
+      operationId: MagazinesCreacio
+      requestBody:
+        description: Indicar el títol i el nom de la magazine a crear
+        content:
+          application/json:
+            schema:
+              required:
+                - Title
+                - Name
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  example: "Titol de la magazine"
+                name:
+                  type: string
+                  maxLength: 80
+                  example: "Nom de la magazine"
+        required: true
+      responses:
+        '201':
+          description: Operació correcte.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NouMagazine'
+        '400':
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    mensaje: "Error: Falten atributs. Cal indicar nom i títol de la magazine a crear."
+        '401':
+          description: Es necessari indicar el token de l'usuari
+          content:
+            application/json:
+              examples:
+                errorExample:
+                  value:
+                    error: No s'ha indicat el token de l'usuari
+
+        '403':
+          description: 'Error: Forbidden'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+
+        '409':
+          description: 'Error: Conflict'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    mensaje: "Error: Ja existeix una magazine amb aquest name."
+
+          # TODO
+      security:
+        - ApiKeyAuth: [ ]
+
+  /suscriptions/{id_magazine}/:
+    post:
+      tags:
+        - Magazines
+      summary: Crea una subscripció del usuari loguejat a la magazine indicada amb id_magazine, si no està ja subscrit
+      operationId: SubscripcioCreacio
+      parameters:
+        - in: path
+          name: id_magazine
+          required: true
+          schema:
+            type: string
+          description: ID de la magazine a la que ens volem subscriure
+      responses:
+        '201':
+          description: Operació correcte. La subscripció s'ha creat correctament
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NovaSubscripcio'
+
+        '400':
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    mensaje: "Error: L'usuari loguejat ja esta subscrit a la magazine indicada."
+        '401':
+          description: Es necessari indicar el token de l'usuari
+          content:
+            application/json:
+              examples:
+                errorExample:
+                  value:
+                    error: No s'ha indicat el token de l'usuari
+
+        '403':
+          description: 'Error: Forbidden'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+
+        '404':
+          description: No existeix una magazine amb id_magazine
+          content:
+            applicatin/json:
+              schema:
+                $ref: '#/components/schemas/MagazineNotFoundError'
+
+        # TODO
+      security:
+        - ApiKeyAuth: [ ]
+
+    delete:
+      tags:
+        - Magazines
+      summary: Borra la subscripció del usuari loguejat a la magazine indicada amb id_magazine, si aquesta existeix
+      operationId: SubscripcioBorrat
+      parameters:
+        - in: path
+          name: id_magazine
+          required: true
+          schema:
+            type: string
+          description: ID de la magazine a la que volem eliminar la subscripció
+      responses:
+        '204':
+          description: Operació correcte. S'ha eliminat la subscripció
+
+        '400':
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  value:
+                    mensaje: "Error: L'usuari loguejat no esta subscrit a la magazine indicada."
+        '401':
+          description: Es necessari indicar el token de l'usuari
+          content:
+            application/json:
+              examples:
+                errorExample:
+                  value:
+                    error: No s'ha indicat el token de l'usuari
+
+        '403':
+          description: 'Error: Forbidden'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+              examples:
+                errorExample:
+                  $ref: '#/components/examples/error403'
+
+        '404':
+          description: No existeix una magazine amb id_magazine
+          content:
+            applicatin/json:
+              schema:
+                $ref: '#/components/schemas/MagazineNotFoundError'
+        # TODO
+      security:
+        - ApiKeyAuth: [ ]
+
+
+components:
+  schemas:
+    Thread:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID del thread
+          example: 2
+        num_likes:
+          type: integer
+          description: Nombre de likes del thread
+          example: 0
+        num_dislikes:
+          type: integer
+          description: Nombre de dislikes del thread
+          example: 0
+        author:
+          type: string
+          description: Autor del thread
+          example: "El meu nom"
+        title:
+          type: string
+          description: Titol del thread
+          example: "El titol"
+        body:
+          type: string
+          description: Body del thread
+          example: "El meu Body"
+        creation_data:
+          type: string
+          format: date-time
+          description: Data de creació del thread
+        num_comments:
+          type: integer
+          description: Nombre de comentaris del thread
+          example: 0
+        num_boosts:
+          type: integer
+          description: Nombre de boosts del thread
+          example: 1
+        magazine:
+          type: integer
+          description: ID de la magazine del thread
+          example: 1
+
+    Link:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID del link
+          example: 2
+        num_likes:
+          type: integer
+          description: Nombre de likes del link
+          example: 10
+        num_dislikes:
+          type: integer
+          description: Nombre de dislikes del link
+          example: 3
+        author:
+          type: string
+          description: Autor del link
+          example: "El meu nom"
+        title:
+          type: string
+          description: Titol del link
+          example: "El titol"
+        body:
+          type: string
+          description: Body del link
+          example: "El meu Body"
+        creation_data:
+          type: string
+          format: date-time
+          description: Data de creació del link
+        num_comments:
+          type: integer
+          description: Nombre de comentaris del link
+          example: 2
+        num_boosts:
+          type: integer
+          description: Nombre de boosts del link
+          example: 1
+        magazine:
+          type: integer
+          description: ID de la magazine del link
+          example: 1
+        url:
+          type: string
+          description: URL del link
+          example: "www.raco.fib.upc.edu"
+
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          description: ID de l'user
+          example: "user123"
+        description:
+          type: string
+          description: Descripció de l'user
+          example: "Aquesta és la meva descripció"
+        token:
+          type: string
+          description: Token de l'user
+          example: "b6eb16471f535636a4c4897ba6559384e9e80bf7"
+        cover:
+          type: string
+          description: URL de la imatge de la cover de l'user
+          example: "https://bravo13-bucket.s3.amazonaws.com/cover"
+        avatar:
+          type: string
+          description: URL de la imatge de l'avatar de l'user
+          example: "https://bravo13-bucket.s3.amazonaws.com/avatar"
+        email:
+          type: string
+          description: Correu electrònic de l'user
+          example: "user123@gmail.com"
+        total_threads:
+          type: integer
+          description: Número de publicacions (threads i links) creats per l'user
+          example: 12
+        total_comments:
+          type: integer
+          description: Número de comments creats per l'user
+          example: 24
+        total_boosts:
+          type: integer
+          description: Número de boosts fets per l'user
+          example: 48
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Id del comentari
+          example: 1
+        author:
+          type: string
+          description: Autor del comentari
+          example: "user123"
+        body:
+          type: string
+          description: Contigut del comentari
+          example: "Aquest és el body del comentari"
+        creation_data:
+          type: string
+          format: date-time
+          description: Data de la creació del comentari
+          example: "2024-03-29T00:00:00Z"
+        last_edited:
+          type: string
+          format: date-time
+          description: Data de l'última edició del comentari
+          example: "2024-03-30T00:00:00Z"
+        num_likes:
+          type: integer
+          description: Número de likes del comentari
+          example: 2
+        num_dislikes:
+          type: integer
+          description: Número de dislikes del comentari
+          example: 4
+        level:
+          type: integer
+          description: Nivell del comentari
+          example: 2
+        parent:
+          type: string
+          description: URL del link del thread
+          example: "http://127.0.0.1:8000/api/threads/2/"
+        replies:
+          type: array
+          description: Respostes al comentari
+          items:
+            $ref: '#/components/schemas/Comment'
+          example:
+            - id: 2
+              author: "user123"
+              body: "Aquest és el body del comentari resposta"
+              creation_data: "2024-03-29T00:00:00Z"
+              last_edited: null
+              num_likes: 0
+              num_dislikes: 0
+              level: 2
+              parent: "http://127.0.0.1:8000/api/threads/2/"
+              replies: [ ]
+
+    Magazine:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID de la magazine
+          example: 1
+        author:
+          type: string
+          description: Nom del autor de la magazine
+          example: "El meu nom"
+        creation_date:
+          type: string
+          description: Data de la creació de la magazine
+          example: "2024-05-07T15:53:12.372397Z"
+        name:
+          type: string
+          description: Nom  de la magazine
+          example: "Nom magazine"
+        title:
+          type: string
+          description: Títol  de la magazine
+          example: "Títol magazine"
+        description:
+          type: string
+          description: Descripció  de la magazine
+          example: "Descripció magazine"
+        rules:
+          type: string
+          description: Regles  de la magazine
+          example: "Regles magazine"
+        nsfw:
+          type: boolean
+          description: Indica si el contingut de la magazine és +18
+          example: false
+        total_threads:
+          type: integer
+          description: Número de threads  de la magazine
+          example: 2
+        total_links:
+          type: integer
+          description: Número de links  de la magazine
+          example: 1
+        total_publicacions:
+          type: integer
+          description: Número de threads i links  de la magazine
+          example: 2
+        total_comments:
+          type: integer
+          description: Número de comentaris de la magazine
+          example: 5
+        n_suscriptions:
+          type: integer
+          description: Número de subscriptors de la magazine
+          example: 33
+
+    Vot:
+      type: object
+      properties:
+        publicacio_id:
+          type: integer
+          description: ID de la publicació
+          example: 1
+        positiu:
+          type: boolean
+          description: Indica si el vot és un like o no
+
+    VotComentari:
+      type: object
+      properties:
+        comment_id:
+          type: integer
+          description: ID del comentari
+          example: 1
+        type:
+          type: string
+          description: Indica si el vot és un like o no
+
+    Boost:
+      type: object
+      properties:
+        publicacio_id:
+          type: integer
+          description: ID de la publicació
+          example: 1
+
+
+    NouThread:
+      allOf:
+        - $ref: '#/components/schemas/Thread'
+        - type: object
+
+
+    NouComment:
+      allOf:
+        - $ref: '#/components/schemas/Comment'
+        - type: object
+
+    NouMagazine:
+      allOf:
+        - $ref: '#/components/schemas/Magazine'
+        - type: object
+
+    NovaSubscripcio:
+      type: object
+      properties:
+        user:
+          type: string
+          description: L'usuari que ha realitzat la subscripció
+          example: 'marc'
+        magazine:
+          type: integer
+          description: La id de la magazine a la que s'ha subscrit
+          example: 1
+
+    ErrorResult:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Titol massa curt'
+      required:
+        - message
+
+    TokenUserNotMatchError:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: El token no correspon al usuari
+
+    TokenNotFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: El token no s'ha trobat
+
+    PublicacioNotFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: No hi ha cap publicacio amb ID 0
+
+    FiltreNotFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: El filtre sol·licitat no ha estat trobat
+
+    OrdreNotFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: L'ordre sol·licitat no ha estat trobat
+
+    UserNotFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+
+        error: L'user sol·licitat no ha estat trobat
+
+    CommentNotFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: No s'ha trobat el comentari amb ID 0
+
+    VotNotFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: No s'ha trobat cap vot per aquest comentari.
+
+    VotNoCoincideixError:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: El vot fet per l'usuari no coincideix amb el vot indicat.
+
+    MagazineNotFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: El magazine sol·licitat no s'ha trobat
+
+  examples:
+    error400:
+      value:
+        error: "Contingut massa curt"
+    error401:
+      value:
+        error: "No has indicat cap token"
+    error403:
+      value:
+        error: "El token indicat no és vàlid"
+    error404:
+      value:
+        error: "No hi ha una publicació amb id=3"
+    error409:
+      value:
+        error: "Ja existeix una magazine amb aquest títol"
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      name: Authorization
+      in: header

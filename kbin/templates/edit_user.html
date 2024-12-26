@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" style="font-size: 100%">
+<head>
+    <style>
+        .turbo-progress-bar {
+            position: fixed;
+            display: block;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: #0076ff;
+            z-index: 2147483647;
+            transition: width 300ms ease-out,
+            opacity 150ms 150ms ease-in;
+            transform: translate3d(0, 0, 0);
+        }
+    </style>
+    <title>Profile - {{ usuari.username }} - kbin.social</title>
+    <link rel="icon" href="{% static '/ico/favicon.ico' %}" sizes="any">
+    <link rel="stylesheet" href="{% static '/css/824.b4cc3385.css' %}" data-turbo-track="reload">
+    <link rel="stylesheet" href="{% static '/css/app.910c0aab.css' %}" data-turbo-track="reload">
+</head>
+<body class="theme--light" data-controller="kbin notifications" data-turbo="false">
+{% include 'base.html' %}
+<div id="middle" class="page-settings page-settings-profile">
+    <div class="kbin-container">
+        <main id="main" data-controller="lightbox timeago" class="">
+            <aside class="options options--top" id="options">
+                <div></div>
+                <menu class="options__main">
+                    <li>
+                        <a href="/settings/profile" class="active"> profile </a>
+                    </li>
+                </menu>
+            </aside>
+            {% include 'section_user.html' %}
+            <div id="content" class="section">
+                <div class="container">
+                    <h1 hidden>Profile</h1>
+                    <form name="edit-user" method="post" enctype="multipart/form-data">
+                        <div><textarea id="user_basic_about" name="description" placeholder="About"
+                                       data-controller="input-length rich-textarea autogrow"
+                                       data-entry-link-create-target="user_about"
+                                       data-action="input-length#updateDisplay"
+                                       data-input-length-max-value="512">{{ usuari.description }}</textarea>
+                        </div>
+                        <div>
+                            <label for="user_basic_username">Username</label>
+                            <div id="user_basic_username" name="username"
+                                 style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; border: 1px solid #ccc; padding: 2px 8px;">
+                                {{ usuari.username }}
+                            </div>
+                        </div>
+                        <div><label for="user_basic_avatar">Avatar</label><input type="file" id="user_basic_avatar"
+                                                                                 name="avatar"></div>
+                        <div><label for="user_basic_cover">Front page</label><input type="file" id="user_basic_cover"
+                                                                                    name="cover"></div>
+                        <div class="row actions">
+                            <div>
+                                <button type="submit" id="user_basic_submit" name="user_basic[submit]"
+                                        class="btn btn__primary">Keep
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

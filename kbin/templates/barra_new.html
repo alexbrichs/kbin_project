@@ -1,0 +1,11 @@
+{% load static %}
+<aside class="options options--top options-activity">
+                <div class="options__title">
+                    <h2>Add new</h2>
+                </div>
+                <menu class="options__main">
+                    <li><a href="/new" class="{% if actiu == 'link' %}active{% endif %}">link</a></li>
+                    <li><a href="/new/thread" class="{% if actiu == 'thread' %}active{% endif %}">thread</a></li>
+                    <li><a href="/newMagazine" class="{% if actiu == 'magazine' %}active{% endif %}">magazine</a></li>
+                </menu>
+            </aside>

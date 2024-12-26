@@ -1,0 +1,43 @@
+<div class="section section--top">
+    <div class="user-box">
+        <div class="">
+            <div class="user-main" id="content">
+                <div style="margin-right: 200px;">
+                    <div class="row">
+                        <h1>{{ magazine.title }}</h1>
+                        <small>{{ magazine.name }}@kbin.social</small>
+                    </div>
+                    <aside class="user__actions" data-controller="subs">
+                        <div class='action'>
+                            <i class="fa-solid fa-users"></i>
+                            <span>{{ magazine.n_suscriptions }}</span>
+                        </div>
+                        <div>
+                            Created: {{ magazine.creation_date }}
+                            <br>
+                            <div style="display: block;">
+                                Owner: <a
+                                    href="{% url 'view_user' username=magazine.author_id %}">{{ magazine.author_id }}</a>
+                            </div>
+                        </div>
+
+                    </aside>
+                </div>
+
+                <div>
+                    <div>
+                        <strong>Description</strong>
+                        <br>
+                        {{ magazine.description }}
+                    </div>
+                    <br>
+                    <div>
+                        <strong>Rules</strong><br>
+                        {{ magazine.rules }}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

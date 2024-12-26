@@ -1,0 +1,101 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ca" style="font-size: 100%">
+<head>
+    <style type="text/css">.turbo-progress-bar {
+        position: fixed;
+        display: block;
+        top: 0;
+        left: 0;
+        height: 3px;
+        background: #0076ff;
+        z-index: 2147483647;
+        transition: width 300ms ease-out,
+        opacity 150ms 150ms ease-in;
+        transform: translate3d(0, 0, 0);
+    }
+    </style>
+    <title>Magazines</title>
+    <link rel="icon" href="{% static '/ico/favicon.ico' %}" sizes="any">
+    <link rel="stylesheet" href="{% static '/css/824.b4cc3385.css' %}" data-turbo-track="reload">
+    <link rel="stylesheet" href="{% static '/css/app.910c0aab.css' %}" data-turbo-track="reload">
+</head>
+
+<body class="theme--light" data-controller="kbin notifications" data-turbo="false">
+{% include 'base.html' with actiu="magazine" %}
+<div id="middle" class="page-magazines page-settings">
+    <div class="kbin-container">
+        <main id="main" data-controller="lightbox timeago" class="view-compact">
+            <div id="content">
+                <div class="section">
+                    <div class="magazines table-responsive">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th style="text-align: center">Name</th>
+                                <th style="text-align: center"><a rel="nofollow noopener noreferrer"
+                                                                  href="{% url 'all_magazines_thread' %}">Threads</a>
+                                </th>
+                                <th style="text-align: center"><a rel="nofollow noopener noreferrer"
+                                                                  href="{% url 'all_magazines_commented' %}">Comments</a>
+                                </th>
+                                <th style="text-align: center"><a rel="nofollow noopener noreferrer"
+                                                                  href="{% url 'all_magazines_elements' %}">Publications</a>
+                                </th>
+                                <th style="text-align: center"><a rel="nofollow noopener noreferrer"
+                                                                  href="{% url 'all_magazines_suscriptions' %}">Subscriptions</a>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for magazine in magazines %}
+                                <tr>
+                                    <td>
+                                        <a class="magazine-inline stretched-link"
+                                           href="{% url 'veure_magazine_newest' magazine.id 'tot' %}">{{ magazine.name }}</a>
+                                    </td>
+                                    <td style="vertical-align: middle;">
+                                        <p style="margin: 0;">{{ magazine.total_threads }}</p>
+                                    </td>
+                                     <td style="vertical-align: middle;">
+                                        <p style="margin: 0;">{{ magazine.total_comments }}</p>
+                                    </td>
+                                     <td style="vertical-align: middle;">
+                                        <p style="margin: 0;">{{ magazine.total_publicacions }}</p>
+                                    </td>
+                                    <td>
+                                        <aside class="magazine__subscribe" data-controller="subs">
+                                            <div class="action">
+                                                <i class="fa-solid fa-users"></i>
+                                                <span>{{ magazine.n_suscriptions }}</span>
+                                            </div>
+                                            <form action="
+
+                                                    {% if magazine.id in user_subscriptions %}{% url 'unsubscribe' magazine.id %}
+                                                        {% else %}{% url 'subscribe' magazine.id %}{% endif %}"
+                                                  name="magazine_subscribe" method="post">
+                                                <button type="submit" class="btn btn__secondary action"
+                                                        data-action="subs#send">
+                                                    {% if magazine.id in user_subscriptions %}
+                                                        <i class="fa-sharp fa-solid fa-folder-minus"></i>
+                                                        <span>Unsubscribe</span>
+                                                    {% else %}
+                                                        <i class="fa-sharp fa-solid fa-folder-plus"></i>
+                                                        <span>Subscribe</span>
+                                                    {% endif %}
+                                                </button>
+                                            </form>
+                                        </aside>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

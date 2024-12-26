@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" style="font-size: 100%">
+<head>
+    <!--No cal posar type="text/css" donat que a HTML5 ja no s'utilitza
+        i el valor predeterminat de type és text/css -->
+    <style>
+        .turbo-progress-bar {
+          position: fixed;
+          display: block;
+          top: 0;
+          left: 0;
+          height: 3px;
+          background: #0076ff;
+          z-index: 2147483647;
+          transition:
+            width 300ms ease-out,
+            opacity 150ms 150ms ease-in;
+          transform: translate3d(0, 0, 0);
+        }
+    </style>
+    <title>Profile - {{ user.username }} - kbin.social</title>
+    <link rel="icon" href="{% static '/ico/favicon.ico' %}" sizes="any">
+    <link rel="stylesheet" href="{% static '/css/824.b4cc3385.css' %}" data-turbo-track="reload">
+    <link rel="stylesheet" href="{% static '/css/app.910c0aab.css' %}" data-turbo-track="reload">
+</head>
+<body class="theme--light" data-controller="kbin notifications" data-turbo="false">
+    {% include 'base.html' %}
+    <div id="middle" class="page-user page-user-overview">
+        <div class="kbin-container">
+            <main id="main" data-controller="lightbox timeago" class="">
+                {% include 'view_user_general.html' %}
+                <div id="content" class="overview subjects comments-tree comments show-comment-avatar show-post-avatar">
+                    {% for thread in all %}
+                        {% if type == "threads" %}
+                            {% include 'show_threads.html' %}
+                        {% elif type == "comments" %}
+                            {% include 'comments_tree.html' %}
+                        {% elif type == "boosts" %}
+                            {% include 'show_boosts.html' %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
+</body>
+</html>

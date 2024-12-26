@@ -1,0 +1,50 @@
+{% load static %}
+<header id="header" class="header">
+    <div class="kbin-container">
+        <nav class="head-nav">
+            <div class="brand">
+                <a href="/"><img id="logo" src="{% static '/svg/kbin_logo.svg' %}" alt="Homepage" title="Homepage"></a>
+            </div>
+            <menu class="head-nav__menu">
+                <li></li>
+                <li><a href="/" class="{% if actiu == 'threads' %}active{% endif %}">Threads</a></li>
+                <li><a href="/magazines" class="{% if actiu == 'magazine' %}active{% endif %}">Magazines</a></li>
+            </menu>
+        </nav>
+
+        <menu>
+            <li>
+                <a href="/cercador" class="icon" aria-label="Search" title="Search">
+                    <i class="fa-solid fa-magnifying-glass"></i> Search
+                </a>
+            </li>
+
+            <li class="dropdown"><a href="/new" class="icon" aria-label="Add" title="Add"><i
+                    class="fa-solid fa-plus"></i> Add</a>
+                <ul class="dropdown__menu">
+                    <li><a href="/new" class="">Add new link</a></li>
+                    <li><a href="/new/thread" class="">Add new thread</a></li>
+                    <li><a class="" href="/newMagazine">Create new magazine</a></li>
+                </ul>
+            </li>
+            {% if user.is_authenticated %}
+                <li class="dropdown"><a class=" login" href="/u/{{ usuari.username }}"><span
+                        class="user-name">{{ usuari.username }}</span></a>
+                    <ul class="dropdown__menu">
+                        <li><a href="/u/{{ usuari.username }}" class="">Profile</a></li>
+                        <li><a href="/kbin/settings/profile/{{ usuari.username }}" class="">Settings</a></li>
+                        <li><a href="/logout">Sing off</a></li>
+                    </ul>
+                </li>
+                <!-- No s'ha iniciat la sessió -->
+            {% else %}
+                {% load socialaccount %}
+                <a class="login" href="/accounts/google/login">
+                    Log in
+                </a>
+
+
+            {% endif %}
+        </menu>
+    </div>
+</header>

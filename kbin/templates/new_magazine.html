@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ca" style="font-size: 100%">
+<head>
+    <style type="text/css">.turbo-progress-bar {
+        position: fixed;
+        display: block;
+        top: 0;
+        left: 0;
+        height: 3px;
+        background: #0076ff;
+        z-index: 2147483647;
+        transition: width 300ms ease-out,
+        opacity 150ms 150ms ease-in;
+        transform: translate3d(0, 0, 0);
+    }
+    </style>
+    <title>New Magazine</title>
+    <link rel="icon" href="{% static '/ico/favicon.ico' %}" sizes="any">
+    <link rel="stylesheet" href="{% static '/css/824.b4cc3385.css' %}" data-turbo-track="reload">
+    <link rel="stylesheet" href="{% static '/css/app.910c0aab.css' %}" data-turbo-track="reload">
+</head>
+<body class="theme--light" data-controller="kbin notifications" data-turbo="false">
+
+{% include 'base.html' %}
+<div id="middle" class="page-entry-create page-entry-create-link">
+
+    <div class="kbin-container">
+        <main id="main" data-controller="lightbox timeago" class="">
+            {% include 'barra_new.html' with actiu="magazine" %}
+            <div id="content" class="section">
+                <div class="container">
+                    <form name="magazine" method="post" action="{% url 'new_magazine' %}">
+                        <div>
+                            {% if is_used %}
+                                <div>
+                                    <ul>
+                                        <li>This value has already been used.</li>
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            <label for="magazine_name" class="required">Name</label>
+                            <input type="text"
+                                   id="magazine_name"
+                                   name="name"
+                                   required="required"
+
+                            >
+                        </div>
+                        <div>
+                            <label for="magazine_title" class="required">Title</label>
+                            <input type="text"
+                                   id="magazine_title"
+                                   name="title"
+                                   required="required"
+                                   style="overflow: hidden; height: 51px;">
+                        </div>
+
+                        <div>
+                            <textarea id="magazine_description" name="description" placeholder="Description"
+                                      style="overflow: hidden; height: 70px;"></textarea>
+                        </div>
+                        <div><textarea id="magazine_rules" name="rules" placeholder="Rules"
+                                       style="overflow: hidden; height: 70px;"></textarea>
+                        </div>
+                        <div class="checkbox"><label for="magazine_isAdult">18+ / NSFW</label><input type="checkbox"
+                                                                                                     id="magazine_isAdult"
+                                                                                                     name="isAdult"
+                                                                                                     value="1"></div>
+                        <div class="row actions">
+                            <div class="float-end">
+                                <button type="submit" id="magazine_submit" name="magazine[submit]"
+                                        class="btn btn__primary">
+                                    Create new magazine
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

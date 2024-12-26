@@ -1,0 +1,43 @@
+<div class="section">
+    <div class="user-box">
+        {% if usuari2.cover and usuari2.avatar %}
+            <div class="with-cover with-avatar">
+        {% elif usuari2.cover != '' %}
+            <div class="with-cover">
+        {% elif usuari2.avatar %}
+            <div class="with-avatar">
+        {% else %}
+            <div class="">
+        {% endif %}
+
+        {% if usuari2.cover %}
+            <img height="200" width="100%" class="cover"
+                 src={{ usuari2.cover }} alt="@{{ usuari2.username }}@kbin.social">
+        {% endif %}
+            <div class="user-main" id="content">
+                <div>
+                    <div class="row">
+                        <figure>
+                            {% if usuari2.avatar %}
+                                <img width="100" height="100" style="max-width: 100px; max-height: 100px;"
+                                     src={{ usuari2.avatar }} alt="@{{ usuari2.username }}@kbin.social">
+                            {% endif %}
+                        </figure>
+                        <h1>{{ usuari2.username }}</h1>
+                        <small>@{{ usuari2.username }}@kbin.social</small>
+                        <small>{% if user.email == usuari2.email %}{{ usuari2.api_key }}{% endif %}</small>
+                    </div>
+                </div>
+            </div>
+            {% if usuari2.description %}
+                <div class="about">
+                    <div class="content">
+                        <p>{{ usuari2.description }}</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+

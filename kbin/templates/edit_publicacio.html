@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ca" style="font-size: 100%">
+<head>
+    <style type="text/css">.turbo-progress-bar {
+        position: fixed;
+        display: block;
+        top: 0;
+        left: 0;
+        height: 3px;
+        background: #0076ff;
+        z-index: 2147483647;
+        transition: width 300ms ease-out,
+        opacity 150ms 150ms ease-in;
+        transform: translate3d(0, 0, 0);
+    }
+    </style>
+    <title>Add new thread - kbin.social</title>
+    <link rel="icon" href="{% static '/ico/favicon.ico' %}" sizes="any">
+    <link rel="stylesheet" href="{% static '/css/824.b4cc3385.css' %}" data-turbo-track="reload">
+    <link rel="stylesheet" href="{% static '/css/app.910c0aab.css' %}" data-turbo-track="reload">
+</head>
+<body class="theme--light" data-controller="kbin notifications" data-turbo="false">
+
+{% include 'base.html' %}
+<div id="middle" class="page-entry-create page-entry-create-link">
+    <div class="kbin-container">
+        <main id="main" data-controller="lightbox timeago" class="">
+            {% include 'show_threads.html' %}
+            <div id="content" class="section">
+                <div class="container" data-controller="entry-link-create">
+                    {% if url == None %}
+                        <form action="{% url 'edit_thread' thread.id %}" name="entry_link" method="post"
+                              class="entry-create" enctype="multipart/form-data">
+                    {% else %}
+                        <form action="{% url 'editar_link' thread.id %}" name="entry_link" method="post"
+                              class="entry-create" enctype="multipart/form-data">
+                    {% endif %}
+                    {% if url != None %}
+                        <div>
+                            <label for="entry_link_title" class="required">URL</label>
+                            <textarea id="entry_link_title" name="url" required="required"
+                                      data-input-length-max-value="255"
+                                      style="overflow: hidden; height: 66px; cursor: default" disabled>{{ url }}
+                            </textarea>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <label for="entry_link_title" class="required">Title</label>
+                        <textarea id="entry_link_title" name="title" required="required"
+                                  data-input-length-max-value="255"
+                                  style="overflow: hidden; height: 66px;">{{ titol }}
+                            </textarea>
+                    </div>
+                    <div>
+                            <textarea id="entry_link_body" name="body" placeholder="Body"
+                                      data-input-length-max-value="35000"
+                                      style="overflow: hidden; height: 66px;">{{ body }}
+                            </textarea>
+                    </div>
+                    <div style="width: 100%;">
+                        <label for="magazine_select" style="display: block; margin-bottom: 5px;">Magazine</label>
+                        <select name="magazine" id="magazine_select"
+                                style="width: 100%; border-style: solid; height: 50px ;cursor: default"
+                                required="required" disabled>
+                            <option value="" selected>{{ magazine }}</option>
+                        </select>
+                    </div>
+                    <div class="row actions">
+                        <ul>
+                            <li>
+                                <div>
+                                    <button type="submit" id="entry_link_submit" name="entry_link[submit]"
+                                            class="btn btn__primary">Edit thread
+                                    </button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<blockquote class="section comment entry-comment subject comment-level--1"
+                id="entry-comment-{{ comment.id }}" data-controller="comment subject mentions"
+                data-subject-parent-value="" data-action="">
+        <header>
+            <a
+                    data-action="mouseover->mentions#user_popup mouseout->mentions#user_popup_out"
+                    class="user-inline"
+                    title={{ comment.author.email }}
+                    href="{% url 'view_user' comment.author.username %}">
+                {{ comment.author.username }}</a>,
+            <time class="timeago">{{ comment.creation_data|timesince }} ago in
+            <a href="{% url 'veure_thread' thread_id=thread.id order='top'%}">{{ thread.title }}</a></time>
+            {% if comment.last_edited %}
+                (edited
+                <time class="timeago">{{ comment.last_edited|timesince }}</time> ago)
+            {% endif %}
+        </header>
+        <div class="content" style="">
+            <p>{{ comment.body }}</p>
+        </div>
+
+        <aside class="vote">
+            <form method="post" class="vote__up"
+                  action="{% url 'like_comment' thread_id=comment.thread_id  comment_id=comment.id %}">
+                <button type="submit" title="Favorito" aria-label="Favorito"
+                        data-action="subject#vote">
+                    <span data-subject-target="favCounter">{{ comment.num_likes }}</span> <span><i
+                        class="fa-solid fa-arrow-up"></i></span>
+                </button>
+            </form>
+            <form method="post" class="vote__down"
+                  action="{% url 'dislike_comment' thread_id=comment.thread_id   comment_id=comment.id %}">
+                <button type="submit" title="Votos negativos" aria-label="Votos negativos"
+                        data-action="subject#vote" class="vote__up">
+                    <span data-subject-target="downvoteCounter">{{ comment.num_dislikes }}</span> <span><i
+                        class="fa-solid fa-arrow-down"></i></span>
+                </button>
+            </form>
+        </aside>
+
+        <footer>
+            <menu>
+                <li>
+                    <a class="stretched-link"
+                       onclick="document.getElementById('reply_{{ comment.id }}').style.display = 'block';"
+                       data-action=" subject#getForm">reply</a>
+                </li>
+                {% if request.user.email == comment.author.email %}
+                    <li>
+                        <a class="stretched-link"
+                           onclick="document.getElementById('edit_{{ comment.id }}').style.display = 'block';"
+                           data-action=" subject#getForm">edit</a>
+                    </li>
+                    <li>
+                        <a class="stretched-link"
+                           onclick="return confirm('Are you sure you want to delete the comment?');"
+                           href="{% url 'delete_comment' thread_id=comment.thread_id  comment_id=comment.id %}"
+                           data-action=" subject#getForm">delete</a>
+                    </li>
+                {% endif %}
+            </menu>
+            <h3 hidden="">Add a comment</h3>
+            <form id="reply_{{ comment.id }}" name="entry_comment" method="post"
+                  action="{% url 'add_reply' thread_id=comment.thread_id  comment_id=comment.id %}"
+                  class="comment-add" enctype="multipart/form-data" style="display: none">
+                {% csrf_token %}
+                <div><label for="entry_comment_{{ comment.id }}_body"></label><textarea
+                        id="entry_comment_{{ comment.id }}_body"
+                        name="entry_comment[body]"
+                        data-controller="input-length rich-textarea autogrow"
+                        data-action="input-length#updateDisplay"
+                        data-input-length-max-value="5000"
+                        style="overflow: hidden; height: 66px;"></textarea>
+                </div>
+                <div class="row actions">
+                    <ul>
+                        <li class="dropdown">
+                            <div>
+                                <button type="submit"
+                                        id="entry_comment_{{ comment.id }}_submit"
+                                        name="entry_comment[submit]" class="btn btn__primary"
+                                        data-action="subject#sendForm">Add a comment
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+            <form id="edit_{{ comment.id }}" name="edit_comment" method="post"
+                  action="{% url 'edit_comment' thread_id=comment.thread_id  comment_id=comment.id %}"
+                  class="comment-add" enctype="multipart/form-data" style="display: none">
+                {% csrf_token %}
+                <div><label for="entry_comment_{{ comment.id }}_body"></label><textarea
+                        id="entry_comment_{{ comment.id }}_body"
+                        name="entry_comment[body]"
+                        data-controller="input-length rich-textarea autogrow"
+                        data-action="input-length#updateDisplay"
+                        data-input-length-max-value="5000"
+                        style="overflow: hidden; height: 66px;">{{ comment.body }}</textarea>
+                </div>
+                <div class="row actions">
+                    <ul>
+                        <li class="dropdown">
+                            <div>
+                                <button type="submit"
+                                        id="entry_comment_{{ comment.id }}_submit"
+                                        name="entry_comment[submit]" class="btn btn__primary"
+                                        data-action="subject#sendForm">Update comment
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </footer>
+    </blockquote>
